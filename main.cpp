@@ -2,27 +2,19 @@
 #include <string>
 #include "Collector.h"
 using namespace std;
+class Collector;
 class Node {
 
 public:
     int* ValuePoint= nullptr;
     Node* NodePoint= nullptr;
+    void* operator new(std::size_t);
     Node(int a) {
-        ValuePoint=(int*) malloc(sizeof(int));
-        *ValuePoint=a;
+        ValuePoint = (int *) malloc(sizeof(int));
+        *ValuePoint = a;
+    }
 
-    };
-
-    Node* Del(int a) {
-        if(NodePoint== nullptr){
-            return this;
-        }
-        if(*NodePoint->ValuePoint==a){
-            return this;
-        }else{
-            return NodePoint->Del(a);
-        }
-    };
+    void operator delete (void* a) ;
 
     void show(){
     if(ValuePoint!= nullptr){
@@ -35,6 +27,17 @@ public:
     }
     }
 
+    Node* Del(int a) {
+        if(NodePoint== nullptr){
+            return this;
+        }
+        if(*NodePoint->ValuePoint==a){
+            return this;
+        }else{
+            return NodePoint->Del(a);
+        }
+    };
+
 };
 
 class Collector {
@@ -43,21 +46,7 @@ public:
     Collector(){
         First= nullptr;
     };
-    Node* get(){
-        Node* get;
-        if(First==nullptr){
-            First=(Node*) malloc(sizeof(Node));
-            *First= Node(0);
-        }
-        if (First->NodePoint!= nullptr){
-            get=First;
-            First=First->NodePoint;
-        } else{
-            get=First;
-            First= nullptr;
-        }
-        return get;
-    }
+
     void insert(Node* a){
         a->NodePoint = First;
         if(First== nullptr){
@@ -66,25 +55,54 @@ public:
             First = &*a;}
 
     }
-    void show(){
-        cout<<"Garbage:\n";
-        if (First!= nullptr){
+    void show() {
+        cout << "Garbage:\n";
+        if (First != nullptr) {
             First->show();
         }
     }
+    Node* get(){
+            Node* get;
+            if(First==nullptr){
+                First=(Node*) malloc(sizeof(Node));
+                *First= Node(0);
+            }
+            if (First->NodePoint!= nullptr){
+                get=First;
+                First=First->NodePoint;
+            } else{
+                get=First;
+                First= nullptr;
+            }
+            return get;
+        }
 
 };
 
+Collector *Garbage= new Collector();
+
+void* Node::operator new(std::size_t) {
+    if(Garbage->First!= nullptr){
+        return Garbage->get();
+    }else{
+        Node *node=(Node*) malloc(sizeof(int));
+        return node;
+    }
+
+
+}
+
+void Node::operator delete(void* a) {
+    Garbage->insert(static_cast<Node *>(a));
+}
 
 class List{
     Node* First= nullptr;
-    Collector* garbage= (Collector*)malloc(sizeof (Collector));
+    Collector* garbage= Garbage;
 public:
-    List(Collector a){
-        *garbage=a;
-    };
+    List()= default;;
     void insert(int a){
-        Node* get=garbage->get();
+        Node* get=new Node(a);
         *get->ValuePoint=a;
         get->NodePoint = First;
         First = get;
@@ -102,11 +120,9 @@ public:
                     return;
                 }
                 Node* PostDelete=Delete->NodePoint;
-                Node* trash=new Node(0);
-                *trash=*Delete;
-                garbage->insert(trash);
+                delete Delete;
                 if(PostDelete!= nullptr){
-                    *Delete=*PostDelete;}
+                    PrevDelete->NodePoint=PostDelete;}
                 else{
                    PrevDelete->NodePoint= nullptr;
                 }
@@ -122,13 +138,10 @@ public:
     }
 };
 
-
-
 int main() {
     cout <<("hello \n");
     string Action;
-    Collector Garbage= Collector();
-    List list= List(Garbage);
+    List list= List();
     while (true){
         list.show();
         cout<<("waiting for a command \n");
