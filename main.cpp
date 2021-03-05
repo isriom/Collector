@@ -1,6 +1,6 @@
 #include <iostream>
 #include <string>
-#include "Collector.h"
+
 using namespace std;
 class Collector;
 class Node {
