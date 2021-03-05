@@ -147,15 +147,23 @@ int main() {
         cout<<("waiting for a command \n");
         cin >>Action;
         string Operator=Action.substr(0,3);
+        try{
         Action= Action.substr(4,Action.size()-3);
+        }
+        catch(exception& a) {
+            Action="a";
+        }
+        try{
         if (Operator=="add"){
             list.insert(stoi(Action));
         }else if(Operator=="del"){
             list.del(stoi( Action));
-        }else if(Operator=="stp"){
-            cout<<"stop\n";
+        }else if(Operator=="stp") {
+            cout << "stop\n";
             return 0;
-        }else{
+        }
+        }
+        catch(exception& a){
             cout<< "(add ###)/(del ###)/(stp ###) \n";
         }
 
